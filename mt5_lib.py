@@ -1,4 +1,4 @@
-import MetaTrader5
+import mt5linux
 import pandas
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -21,7 +21,7 @@ def start_mt5(project_settings):
     # Attempt to initialize MT5
     mt5_init = False
     try:
-        mt5_init = MetaTrader5.initialize(
+        mt5_init = mt5linux.initialize(
             login=username,
             password=password,
             server=server,
@@ -36,7 +36,7 @@ def start_mt5(project_settings):
     mt5_login = False
     if mt5_init:
         try:
-            mt5_login = MetaTrader5.login(
+            mt5_login = mt5linux.login(
                 login=username,
                 password=password,
                 server=server
@@ -62,7 +62,7 @@ def initialize_symbol(symbol):
     """
     # Check if symbol exists on MT5
     # Get all symbols from MT5
-    all_symbols = MetaTrader5.symbols_get()
+    all_symbols = mt5linux.symbols_get()
     # Create a list of the symbol names
     symbol_names = []
     # Iterate through the retrieved data and add the symbol names to the list
@@ -72,7 +72,7 @@ def initialize_symbol(symbol):
     if symbol in symbol_names:
         # If the symbol does exist, attempt to initalize/enable
         try:
-            MetaTrader5.symbol_select(symbol, True) # <- arguments cannot be declared here or will throw an error
+            mt5linux.symbol_select(symbol, True) # <- arguments cannot be declared here or will throw an error
             return True
         except Exception as e:
             print(f"Error enabling {symbol}. {e}")
@@ -135,16 +135,16 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, dir
         "volume": volume,
         "sl": stop_loss,
         "tp": take_profit,
-        "type_time": MetaTrader5.ORDER_TIME_GTC,
+        "type_time": mt5linux.ORDER_TIME_GTC,
         "comment": comment
     }
 
     # Create the order type based upon provided values.
     if order_type == "SELL_STOP":
         # Update the request dictionary
-        request['type'] = MetaTrader5.ORDER_TYPE_SELL_STOP
-        request['action'] = MetaTrader5.TRADE_ACTION_PENDING
-        request['type_filling'] = MetaTrader5.ORDER_FILLING_RETURN
+        request['type'] = mt5linux.ORDER_TYPE_SELL_STOP
+        request['action'] = mt5linux.TRADE_ACTION_PENDING
+        request['type_filling'] = mt5linux.ORDER_FILLING_RETURN
         # If the stop_price is 0, this is an error
         if stop_price <= 0:
             raise ValueError("Stop Price cannot be zero")
@@ -153,9 +153,9 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, dir
     # Update in the case of a BUY_STOP
     elif order_type == "BUY_STOP":
         # Update the request dictionary
-        request['type'] = MetaTrader5.ORDER_TYPE_BUY_STOP
-        request['action'] = MetaTrader5.TRADE_ACTION_PENDING
-        request['type_filling'] = MetaTrader5.ORDER_FILLING_RETURN
+        request['type'] = mt5linux.ORDER_TYPE_BUY_STOP
+        request['action'] = mt5linux.TRADE_ACTION_PENDING
+        request['type_filling'] = mt5linux.ORDER_FILLING_RETURN
         # Check the stop price
         if stop_price <= 0:
             raise ValueError("Stop Price cannot be zero")
@@ -168,7 +168,7 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, dir
     # If direct is True, go straight to adding the order
     if direct is True:
         # Send the order to MT5
-        order_result = MetaTrader5.order_send(request)
+        order_result = mt5linux.order_send(request)
         # Notify based on the return outcomes
         if order_result[0] == 10009:
             print(f"Order for {symbol} successful")
@@ -184,7 +184,7 @@ def place_order(order_type, symbol, volume, stop_loss, take_profit, comment, dir
     # If direct turned off, check the order first
     else:
         # Check the order
-        result = MetaTrader5.order_check(request)
+        result = mt5linux.order_check(request)
         # If check passes, place an order
         if result[0] == 0:
             print(f"Order check for {symbol} successful. Placing the order") #<- This can be commented out.
@@ -216,14 +216,14 @@ def cancel_order(order_number):
     """
     # Create the request
     request = {
-        "action": MetaTrader5.TRADE_ACTION_REMOVE,
+        "action": mt5linux.TRADE_ACTION_REMOVE,
         "order": order_number,
         "comment": "order removed"
     }
 
     # Attempt to send the order to MT5
     try:
-        order_result = MetaTrader5.order_send(request)
+        order_result = mt5linux.order_send(request)
         if order_result[0] == 10009:
             return True
         else:
@@ -258,7 +258,7 @@ def get_all_open_orders():
     Function to retrieve all open orders from MetaTrader 5
     :return: list of orders
     """
-    return MetaTrader5.orders_get()
+    return mt5linux.orders_get()
 
 
 # Function to retrieve a filtered list of open orders from MT5
@@ -271,7 +271,7 @@ def get_filtered_list_of_orders(symbol, comment):
     :return: list of orders
     """
     # Retrieve open orders, filter by symbol
-    open_orders_by_symbol = MetaTrader5.orders_get(symbol)
+    open_orders_by_symbol = mt5linux.orders_get(symbol)
     # Check if any orders were retrieved (there might be none)
     if open_orders_by_symbol is None:
         return []
@@ -297,47 +297,47 @@ def set_query_timeframe(timeframe):
     :return: MT5 compliant timeframe
     """
     if timeframe == "M1":
-        return MetaTrader5.TIMEFRAME_M1
+        return mt5linux.TIMEFRAME_M1
     elif timeframe == "M2":
-        return MetaTrader5.TIMEFRAME_M2
+        return mt5linux.TIMEFRAME_M2
     elif timeframe == "M3":
-        return MetaTrader5.TIMEFRAME_M3
+        return mt5linux.TIMEFRAME_M3
     elif timeframe == "M4":
-        return MetaTrader5.TIMEFRAME_M4
+        return mt5linux.TIMEFRAME_M4
     elif timeframe == "M5":
-        return MetaTrader5.TIMEFRAME_M5
+        return mt5linux.TIMEFRAME_M5
     elif timeframe == "M6":
-        return MetaTrader5.TIMEFRAME_M6
+        return mt5linux.TIMEFRAME_M6
     elif timeframe == "M10":
-        return MetaTrader5.TIMEFRAME_M10
+        return mt5linux.TIMEFRAME_M10
     elif timeframe == "M12":
-        return MetaTrader5.TIMEFRAME_M12
+        return mt5linux.TIMEFRAME_M12
     elif timeframe == "M15":
-        return MetaTrader5.TIMEFRAME_M15
+        return mt5linux.TIMEFRAME_M15
     elif timeframe == "M20":
-        return MetaTrader5.TIMEFRAME_M20
+        return mt5linux.TIMEFRAME_M20
     elif timeframe == "M30":
-        return MetaTrader5.TIMEFRAME_M30
+        return mt5linux.TIMEFRAME_M30
     elif timeframe == "H1":
-        return MetaTrader5.TIMEFRAME_H1
+        return mt5linux.TIMEFRAME_H1
     elif timeframe == "H2":
-        return MetaTrader5.TIMEFRAME_H2
+        return mt5linux.TIMEFRAME_H2
     elif timeframe == "H3":
-        return MetaTrader5.TIMEFRAME_H3
+        return mt5linux.TIMEFRAME_H3
     elif timeframe == "H4":
-        return MetaTrader5.TIMEFRAME_H4
+        return mt5linux.TIMEFRAME_H4
     elif timeframe == "H6":
-        return MetaTrader5.TIMEFRAME_H6
+        return mt5linux.TIMEFRAME_H6
     elif timeframe == "H8":
-        return MetaTrader5.TIMEFRAME_H8
+        return mt5linux.TIMEFRAME_H8
     elif timeframe == "H12":
-        return MetaTrader5.TIMEFRAME_H12
+        return mt5linux.TIMEFRAME_H12
     elif timeframe == "D1":
-        return MetaTrader5.TIMEFRAME_D1
+        return mt5linux.TIMEFRAME_D1
     elif timeframe == "W1":
-        return MetaTrader5.TIMEFRAME_W1
+        return mt5linux.TIMEFRAME_W1
     elif timeframe == "MN1":
-        return MetaTrader5.TIMEFRAME_MN1
+        return mt5linux.TIMEFRAME_MN1
     else:
         print(f"Incorrect timeframe provided. {timeframe}")
         raise ValueError
@@ -358,7 +358,7 @@ def query_historic_data(symbol, timeframe, number_of_candles):
     # Convert the timeframe into MT5 friendly format
     mt5_timeframe = set_query_timeframe(timeframe=timeframe)
     # Retrieve the data
-    rates = MetaTrader5.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
+    rates = mt5linux.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
     # Convert to a dataframe
     dataframe = pandas.DataFrame(rates)
     # Add a 'Human Time' column
@@ -400,7 +400,7 @@ def query_historic_data_by_time(symbol, timeframe, time_range):
         raise ValueError("Incorrect time range provided")
 
     # Retrieve the data
-    rates = MetaTrader5.copy_rates_range(symbol, mt5_timeframe,start_time, end_time)
+    rates = mt5linux.copy_rates_range(symbol, mt5_timeframe,start_time, end_time)
     # Convert to a dataframe
     dataframe = pandas.DataFrame(rates)
     # Add a 'Human Time' column
@@ -416,7 +416,7 @@ def get_pip_size(symbol):
     :return: float of the pip size
     """
     # Get the symbol information
-    symbol_info = MetaTrader5.symbol_info(symbol)
+    symbol_info = mt5linux.symbol_info(symbol)
     tick_size = symbol_info.trade_tick_size
     pip_size = tick_size * 10
     # Return the pip size
@@ -431,7 +431,7 @@ def get_base_currency(symbol):
     :return: string of the base currency
     """
     # Get the symbol information
-    symbol_info = MetaTrader5.symbol_info(symbol)
+    symbol_info = mt5linux.symbol_info(symbol)
     # Return the base currency
     return symbol_info.currency_base
 
@@ -444,7 +444,7 @@ def get_exchange_rate(symbol):
     :return: float of the exchange rate
     """
     # Get the symbol information
-    symbol_info = MetaTrader5.symbol_info(symbol)
+    symbol_info = mt5linux.symbol_info(symbol)
     # Return the exchange rate
     return symbol_info.bid
 
@@ -465,7 +465,7 @@ def get_candlesticks(symbol, timeframe, number_of_candles):
     # Convert the timeframe into MT5 friendly format
     mt5_timeframe = set_query_timeframe(timeframe=timeframe)
     # Retrieve the data
-    candles = MetaTrader5.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
+    candles = mt5linux.copy_rates_from_pos(symbol, mt5_timeframe, 1, number_of_candles)
     # Convert to a dataframe
     dataframe = pandas.DataFrame(candles)
     # Add a 'Human Time' column
@@ -481,7 +481,7 @@ def get_contract_size(symbol):
     :return: float of the contract size
     """
     # Get the symbol information
-    symbol_info = MetaTrader5.symbol_info(symbol)
+    symbol_info = mt5linux.symbol_info(symbol)
     # Return the contract size
     return symbol_info.trade_contract_size
 
@@ -493,6 +493,6 @@ def get_balance():
     :return: float of the balance
     """
     # Get the account information
-    account_info = MetaTrader5.account_info()
+    account_info = mt5linux.account_info()
     # Return the balance
     return account_info.balance
