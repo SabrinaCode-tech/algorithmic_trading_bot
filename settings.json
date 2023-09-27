@@ -1,0 +1,21 @@
+{
+    "nome": "Seu Nome",
+    "email": "seu.email@example.com",
+    "configuracoes": {
+        "idioma": "Python",
+        "versao": "3.8"
+    },
+    
+        "binance": {
+            "config_location": "seu_arquivo_de_configuracao.txt"
+        },
+        "outra_chave": "valor",
+        "keys": {
+            "api_key": "sua_api_key_aqui",
+            "api_secret": "seu_api_secret_aqui"
+        }
+    
+    
+    
+}
+
